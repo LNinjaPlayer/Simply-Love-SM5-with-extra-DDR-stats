@@ -6,7 +6,7 @@ local _w = IsUsingWideScreen() and 320 or 310
 
 local af = Def.ActorFrame{
 	OnCommand=function(self)
-		self:xy(_screen.cx - (IsUsingWideScreen() and 170 or 165), _screen.cy - 55)
+		self:xy(_screen.cx - (IsUsingWideScreen() and 134 or 130), _screen.cy - 55) -- x was 170 and 165
 	end,
 	DisplayLanguageChangedMessageCommand=function(self) self:playcommand("Set") end,
 	CurrentSongChangedMessageCommand=function(self)    self:playcommand("Set") end,

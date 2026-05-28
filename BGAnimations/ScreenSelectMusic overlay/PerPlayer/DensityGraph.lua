@@ -16,7 +16,7 @@ local showPatternInfo = false
 local af = Def.ActorFrame{
 	InitCommand=function(self)
 		self:visible( GAMESTATE:IsHumanPlayer(player) )
-		self:xy(_screen.cx-182, _screen.cy+23)
+		self:xy(_screen.cx-146, _screen.cy+23) -- x was -182
 
 		if player == PLAYER_2 then
 			self:addy(height+24)
@@ -196,6 +196,45 @@ af2[#af2+1] = Def.ActorFrame{
 		end,
 	}
 }
+
+local layout = {"Crossovers", "Footswitches", "Sideswitches", "Jacks", "Brackets"}
+
+local rowSpacing = 15
+local noneText = THEME:GetString("SLPlayerOptions", "None")
+
+for i, row in ipairs(layout) do
+	af2[#af2+1] = LoadFont("Common normal")..{
+		Text=(row ~= totalStreamText and "0" or noneText),
+		Name=row .. "Value",
+		InitCommand=function(self)
+			local textHeight = 17
+			local textZoom = 0.8
+			self:zoom(textZoom):horizalign(right)
+			self:x(-width/2 - 90)
+			self:y(-height/2 - 9)
+			self:addy((i-1)*rowSpacing)
+		end,
+		HideCommand=function(self)
+			self:settext(noneText)
+		end,
+		RedrawCommand=function(self)
+			self:settext(SL[pn].Streams[row])
+		end
+	}
+
+	af2[#af2+1] = LoadFont("Common Normal")..{
+		Text=THEME:GetString("TechCategory", row),
+		Name=row,
+		InitCommand=function(self)
+			local textHeight = 17
+			local textZoom = 0.8
+			self:maxwidth(width/textZoom):zoom(textZoom):horizalign(left)
+			self:x(-width/2 - 85)
+			self:y(-height/2 - 9)
+			self:addy((i-1)*rowSpacing)
+		end,
+	}
+end
 
 af2[#af2+1] = Def.ActorFrame{
 	Name="PatternInfo",
