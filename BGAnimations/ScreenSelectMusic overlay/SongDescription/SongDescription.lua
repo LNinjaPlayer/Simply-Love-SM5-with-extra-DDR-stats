@@ -172,13 +172,13 @@ af[#af+1] = Def.ActorFrame{
 			-- otherwise there is more than one player joined and the possibility of split BPMs
 			local p1bpm = StringifyDisplayBPMs(PLAYER_1)
 			local p2bpm = StringifyDisplayBPMs(PLAYER_2)
-			local p1mbpm = tonumber(GetMedianBPM(PLAYER_1))
-			local p2mbpm = tonumber(GetMedianBPM(PLAYER_2))
-			
+			local p1mbpm = GetMedianBPM(PLAYER_1)
+			local p2mbpm = GetMedianBPM(PLAYER_2)
+			p1mbpm = tonumber(p1mbpm)
+			p2mbpm = tonumber(p2mbpm)
 			-- if tonumber() recieves something like "%s - %s" from StringifyDisplayBPMs(), it will return nil
-			-- 
-			if not tonumber(p1bpm) and not tonumber(p1bpm) == p1mbpm then p1bpm = p1bpm.." / "..p1mbpm end
-			if not tonumber(p2bpm) and not tonumber(p2bpm) == p2mbpm then p2bpm = p2bpm.." / "..p2mbpm end
+			if p1mbpm and not tonumber(p1bpm) or not tonumber(p1bpm) == p1mbpm then p1bpm = p1bpm.." / "..p1mbpm end
+			if p2mbpm and not tonumber(p2bpm) or not tonumber(p2bpm) == p2mbpm then p2bpm = p2bpm.." / "..p2mbpm end
 
 			-- it's likely that BPM range is the same for both charts
 			-- no need to show BPM ranges for both players if so
