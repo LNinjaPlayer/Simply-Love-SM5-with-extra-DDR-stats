@@ -1,6 +1,70 @@
 local MusicWheel, SelectedType
 local group_durations = LoadActor("./GroupDurations.lua")
 
+-- GetMedianBPM() will use timing_data:GetBPMsAndTimes to find median BPM (Averarge Constant BPM)
+-- it will help player choose a better scroll speed for some songs where the BPM spikes only for a short burst
+local GetMedianBPM = function(player, StepsOrTrail, MusicRate)
+	local player = player or GAMESTATE:GetMasterPlayerNumber()
+	local StepsOrTrail = StepsOrTrail or (GAMESTATE:IsCourseMode() and GAMESTATE:GetCurrentTrail(player)) or GAMESTATE:GetCurrentSteps(player)
+	local MusicRate = MusicRate or SL.Global.ActiveModifiers.MusicRate
+	
+	if not StepsOrTrail then return end -- no error when loading 
+	local td = StepsOrTrail:GetTimingData()
+	local segments = td:GetBPMsAndTimes()
+	
+    -- Build weighted/duration in beat list of BPM values
+	local weighted = {}
+
+	for i = 1, #segments do
+		local startBeat, bpm = segments[i]:match("([^=]+)=([^=]+)")
+		bpm = math.floor(tonumber(bpm) + 0.5)
+
+		-- Determine end beat of this segment
+		local endBeat
+		if i < #segments then
+			endBeat = segments[i+1]:match("([^=]+)")
+		else
+			endBeat = td:GetBeatFromElapsedTime(GAMESTATE:GetCurrentSong():GetLastSecond())
+		end
+
+		local duration = endBeat - startBeat
+		if duration > 0 then
+			-- Merge durations for identical BPMs
+            local found = false
+            for j = 1, #weighted do
+                if weighted[j][1] == bpm then
+                    weighted[j][2] = weighted[j][2] + duration
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                table.insert(weighted, {bpm, duration})
+            end
+		end
+	end
+	
+	local medianBPM = nil
+	local maxDuration = -math.huge
+	for i = 1, #weighted do
+		local bpm = weighted[i][1]
+		local duration = weighted[i][2]
+
+		if duration > maxDuration then
+			maxDuration = duration
+			medianBPM = bpm
+		end
+	end
+	medianBPM = medianBPM * MusicRate
+	local fmt = MusicRate==1 and "%.0f" or "%.1f"
+	medianBPM = fmt:format(medianBPM)
+	if MusicRate ~= 1 then
+		medianBPM = medianBPM:gsub("%.0", "")
+	end
+    return medianBPM
+end
+
+
 -- width of background quad
 local _w = IsUsingWideScreen() and 320 or 310
 
@@ -95,13 +159,26 @@ af[#af+1] = Def.ActorFrame{
 			-- if only one player is joined, stringify the DisplayBPMs and return early
 			if #GAMESTATE:GetHumanPlayers() == 1 then
 				-- StringifyDisplayBPMs() is defined in ./Scipts/SL-BPMDisplayHelpers.lua
-				self:settext(StringifyDisplayBPMs() or ""):zoom(1)
+				local bpm = StringifyDisplayBPMs()
+				local medianBPM = GetMedianBPM()
+				if tonumber(bpm) == tonumber(medianBPM) then
+					self:settext(bpm or ""):zoom(1)
+				else
+					self:settext(bpm.." / "..medianBPM or ""):zoom(1)
+				end
 				return
 			end
 
 			-- otherwise there is more than one player joined and the possibility of split BPMs
 			local p1bpm = StringifyDisplayBPMs(PLAYER_1)
 			local p2bpm = StringifyDisplayBPMs(PLAYER_2)
+			local p1mbpm = tonumber(GetMedianBPM(PLAYER_1))
+			local p2mbpm = tonumber(GetMedianBPM(PLAYER_2))
+			
+			-- if tonumber() recieves something like "%s - %s" from StringifyDisplayBPMs(), it will return nil
+			-- 
+			if not tonumber(p1bpm) and not tonumber(p1bpm) == p1mbpm then p1bpm = p1bpm.." / "..p1mbpm end
+			if not tonumber(p2bpm) and not tonumber(p2bpm) == p2mbpm then p2bpm = p2bpm.." / "..p2mbpm end
 
 			-- it's likely that BPM range is the same for both charts
 			-- no need to show BPM ranges for both players if so
