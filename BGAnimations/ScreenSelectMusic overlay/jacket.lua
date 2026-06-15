@@ -1,5 +1,4 @@
 local SongOrCourse = GAMESTATE:IsCourseMode() and GAMESTATE:GetCurrentCourse() or GAMESTATE:GetCurrentSong()
-if not SongOrCourse then return end
 
 local t = Def.ActorFrame{
 	OnCommand=function(self)
@@ -16,6 +15,7 @@ t[#t+1] = Def.ActorFrame{
 		CurrentCourseChangedMessageCommand=function(self) self:playcommand("Set") end,
 		SetCommand=function(self)
 			local song = GAMESTATE:GetCurrentCourse() or GAMESTATE:GetCurrentSong()
+			if not song then return end
 			if song:HasJacket() then
 				self:visible(true)
 				local JacketPath = (song and song:GetJacketPath())
