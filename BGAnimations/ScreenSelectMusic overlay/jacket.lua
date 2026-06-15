@@ -1,4 +1,5 @@
 local SongOrCourse = GAMESTATE:IsCourseMode() and GAMESTATE:GetCurrentCourse() or GAMESTATE:GetCurrentSong()
+if not SongOrCourse then return end
 
 local t = Def.ActorFrame{
 	OnCommand=function(self)
