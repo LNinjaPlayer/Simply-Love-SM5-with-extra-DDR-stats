@@ -38,8 +38,8 @@ local w1 = offsets[1]
 local w2 = offsets[2]
 local w3 = offsets[3]
 local w4 = offsets[4]
--- local w5 = offsets[5] -- unused here
--- local Missed = offsets[6] -- unused here
+local w5 = offsets[5]
+local Missed = offsets[6]
 
 local MinesAvoided = (pss:GetRadarActual():GetValue("RadarCategory_Mines"))/4
 local MinesTotal = (possibleRadar:GetValue("RadarCategory_Mines"))/4
