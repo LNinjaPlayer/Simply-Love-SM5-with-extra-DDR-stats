@@ -68,7 +68,7 @@ local t = Def.ActorFrame{
 
 -- do "regular" TapNotes first
 for i=1,#TapNoteScores.Types do
-	local window = TapNoteScores.Types[i]
+	-- local window = TapNoteScores.Types[i]
 	local number = offsets[i]
 	-- pss:GetTapNoteScores( "TapNoteScore_"..window )
 
