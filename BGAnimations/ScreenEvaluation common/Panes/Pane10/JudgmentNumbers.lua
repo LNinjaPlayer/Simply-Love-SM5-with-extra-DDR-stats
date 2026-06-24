@@ -39,6 +39,7 @@ local MinesAvoided = math.floor((pss:GetRadarActual():GetValue("RadarCategory_Mi
 -- mines are hit individualy anyway and doesn't trigger like shocks ¯\_(ツ)_/¯
 
 -- I use what is supposed to be the the Boo value as the O.K. value in the code under
+offsets[6] = offsets[5] + offsets[6] -- Boo are misses in DDR A scoring i.e. offsets[6]
 local TheOKs = Held + MinesAvoided
 offsets[5] = TheOKs
 
