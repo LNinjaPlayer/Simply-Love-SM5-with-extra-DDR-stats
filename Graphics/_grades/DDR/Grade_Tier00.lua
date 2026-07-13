@@ -1,1 +1,0 @@
-return LoadActor("./assets/MarvelousFullcombo_ring.png")..{ OnCommand=function(self) self:zoom(0.85) end }
