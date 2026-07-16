@@ -41,7 +41,7 @@ return Def.ActorFrame{
 				self:y(_screen.cy + 32)
 			else
 				self:x( _screen.cx - (IsUsingWideScreen() and 320 or 310)) -- x was 356 and 346
-				self:y(_screen.cy + 12)
+				self:y(_screen.cy + 12)	
 			end
 
 		elseif player == PLAYER_2 then
@@ -49,8 +49,11 @@ return Def.ActorFrame{
 			if GAMESTATE:IsCourseMode() then
 				self:x( _screen.cx - 174) -- x was - 210
 				self:y(_screen.cy + 85)
+			elseif ThemePrefs.Get("PreferredStyle")=="auto" then
+				self:x( _screen.cx - 174) -- x was - 210
+				self:y(_screen.cy + 28)
 			else
-				self:x( _screen.cx - 208) -- x was - 244
+				sself:x( _screen.cx - 208) -- x was - 244
 				self:y(_screen.cy + 40)
 			end
 		end
@@ -78,7 +81,7 @@ return Def.ActorFrame{
 
 	--STEPS label
 	LoadFont("Common Normal")..{
-		Text=GAMESTATE:IsCourseMode() and Screen.String("SongNumber"):format(1) or Screen.String("STEPS"),
+		Text=GAMESTATE:IsCourseMode() and THEME:GetString("ScreenSelectCourse", "SongNumber"):format(1) or Screen.String("STEPS"),
 		InitCommand=function(self)
 			self:diffuse(0,0,0,1):horizalign(left):x(30):maxwidth(40):zoom(0.8)
 		end,

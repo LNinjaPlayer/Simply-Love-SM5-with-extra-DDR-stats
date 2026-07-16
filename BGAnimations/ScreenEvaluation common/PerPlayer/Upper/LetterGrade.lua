@@ -1,13 +1,20 @@
 local player = ...
 
+local styletype = ToEnumShortString(GAMESTATE:GetCurrentStyle():GetStyleType())
+
 local playerStats = STATSMAN:GetCurStageStats():GetPlayerStageStats(player)
+local routineStatus = SL.Global.RoutineStatus
+if (styletype == "TwoPlayersSharedSides") then
+	playerStats = STATSMAN:GetCurStageStats():GetRoutineStageStats()
+end
 local grade = playerStats:GetGrade()
 
 local pn = ToEnumShortString(player)
-local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(player)
-local highscore = pss:GetHighScore()
-local possibleRadar = pss:GetRadarPossible()
 
+local highscore = playerStats:GetHighScore()
+local possibleRadar = playerStats:GetRadarPossible()
+
+-- TODO: need to make it work with routineStatus
 local sequential_offsets = SL[pn].Stages.Stats[SL.Global.Stages.PlayedThisGame + 1].sequential_offsets
 
 local offsets = { [1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0 }
@@ -41,7 +48,7 @@ local w4 = offsets[4]
 local w5 = offsets[5]
 local Missed = offsets[6]
 
-local MinesAvoided = (pss:GetRadarActual():GetValue("RadarCategory_Mines"))/4
+local MinesAvoided = (playerStats:GetRadarActual():GetValue("RadarCategory_Mines"))/4
 local MinesTotal = (possibleRadar:GetValue("RadarCategory_Mines"))/4
 -- We divide by 4 cuz mines = DDR-shock-arrows and
 -- shock arrows always come in quads and counts as a single N.G. or O.K.
