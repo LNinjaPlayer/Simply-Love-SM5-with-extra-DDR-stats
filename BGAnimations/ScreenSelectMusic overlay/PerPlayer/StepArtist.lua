@@ -53,7 +53,7 @@ return Def.ActorFrame{
 				self:x( _screen.cx - 174) -- x was - 210
 				self:y(_screen.cy + 28)
 			else
-				sself:x( _screen.cx - 208) -- x was - 244
+				self:x( _screen.cx - 208) -- x was - 244
 				self:y(_screen.cy + 40)
 			end
 		end
