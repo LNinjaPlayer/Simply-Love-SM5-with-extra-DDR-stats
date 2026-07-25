@@ -10,7 +10,7 @@ local t = Def.ActorFrame{
 		self:y(96)
 		local x_to_set = _screen.cx - 166
 		local song = GAMESTATE:GetCurrentCourse() or GAMESTATE:GetCurrentSong()
-		if song:HasJacket() then x_to_set = x_to_set + 36 end
+		if song and song:HasJacket() then x_to_set = x_to_set + 36 end
 		if IsUsingWideScreen() then
 			self:zoom(0.7655)
 			x_to_set = x_to_set - 4
