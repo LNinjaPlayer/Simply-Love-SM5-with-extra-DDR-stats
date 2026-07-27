@@ -222,7 +222,7 @@ local Overrides = {
 			if type == "CP" then
 				type = "M"
 				local medianBPM, constantpeakBPM, displaybpms = GetUsefulBPM()
-				if (displaybpms and displaybpms[1] and displaybpms[2]) and displaybpms > constantpeakBPM then -- bad fix for charts like the 18 of ACE FOR ACES from DDR A
+				if (displaybpms and displaybpms[1] and displaybpms[2]) and displaybpms[2] > constantpeakBPM then -- bad fix for charts like the 18 of ACE FOR ACES from DDR A
 					speed = speed * (displaybpms[2]/constantpeakBPM)
 				end
 			end
