@@ -14,7 +14,7 @@ local speedmod_def = {
 	C = { upper=2000, increment=5 },
 	M = { upper=2000, increment=5 },
 	AC = { upper=2000, increment=5 },
-	AP = { upper=2000, increment=5 }
+	CP = { upper=2000, increment=5 }
 }
 
 -- In Routine (couples) mode, default players to the red and blue couples skins
