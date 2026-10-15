@@ -266,6 +266,28 @@ local CalculatePerspectiveSpeed = function(player)
 	return ("%s-%s"):format(bpms[1], bpms[2])
 end
 
+local ChangeVariant = function(pn, direction)
+	local ScreenOptions = SCREENMAN:GetTopScreen()
+	if direction == 0 then
+		local noteskin_name = SL[pn].ActiveModifiers.NoteSkin
+		if NOTESKIN:HasVariants(noteskin_name) then
+			variants_def[pn] = NOTESKIN:GetVariantNamesForNoteSkin(noteskin_name)
+			-- Put the current NoteSkin at the front of the list of variants so that it's the default selection when we refresh the OptionRow
+			table.insert(variants_def[pn], 1, noteskin_name)
+		else
+			variants_def[pn] = {noteskin_name}
+		end
+	end
+	local current_variant = SL[pn].ActiveModifiers.NoteSkinVariant or SL[pn].ActiveModifiers.NoteSkin
+	local variants = variants_def[pn] or {current_variant}
+	local current_index = FindInTable(current_variant, variants) or 1
+
+	-- increment/decrement and apply modulo to wrap around if we exceed the number of variants or hit 0
+	local new_index = ((current_index + direction) - 1) % #variants + 1
+	SL[pn].ActiveModifiers.NoteSkinVariant = variants[new_index]
+end
+
+
 ------------------------------------------------------------
 
 -- SpeedModBMTs is a table that will contain the BitmapText actors within the SpeedMod OptionRow for available players
@@ -485,6 +507,14 @@ for player in ivalues(GAMESTATE:GetHumanPlayers()) do
 				ChangeVariant( original_pn, 0 )
 				self:queuecommand("Set"..original_pn.."Variant")
 			end
+			if row_index == FindOptionRowIndex(topscreen, "NoteSkinVariant") then
+				ChangeVariant( pn, -1 )
+				self:queuecommand("Set"..pn.."Variant")
+			end
+			if row_index == FindOptionRowIndex(topscreen, "NoteSkin") then
+				ChangeVariant( pn, 0 )
+				self:queuecommand("Set"..pn.."Variant")
+			end
 		end,
 		["MenuRight" .. pn .. "MessageCommand"]=function(self)
 			local pn = pn
@@ -506,6 +536,13 @@ for player in ivalues(GAMESTATE:GetHumanPlayers()) do
 			elseif row_index == FindOptionRowIndex(topscreen, "NoteSkin") then
 				ChangeVariant( original_pn, 0 )
 				self:queuecommand("Set"..original_pn.."Variant")
+			end
+			if row_index == FindOptionRowIndex(topscreen, "NoteSkinVariant") then
+				ChangeVariant( pn, 1 )
+				self:queuecommand("Set"..pn.."Variant")
+			elseif row_index == FindOptionRowIndex(topscreen, "NoteSkin") then
+				ChangeVariant( pn, 0 )
+				self:queuecommand("Set"..pn.."Variant")
 			end
 		end
 	}

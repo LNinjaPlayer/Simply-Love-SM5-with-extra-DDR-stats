@@ -61,12 +61,15 @@ local GetUsefulBPM = function(player, StepsOrTrail, MusicRate)
 		end
 	end
 	medianBPM = medianBPM * MusicRate
+	constantpeakBPM = constantpeakBPM * MusicRate
 	local fmt = MusicRate==1 and "%.0f" or "%.1f"
 	medianBPM = fmt:format(medianBPM)
+	constantpeakBPM = fmt:format(constantpeakBPM)
 	if MusicRate ~= 1 then
 		medianBPM = medianBPM:gsub("%.0", "")
+		constantpeakBPM = constantpeakBPM:gsub("%.0", "")
 	end
-    return medianBPM, constantpeakBPM, GetDisplayBPMs(player, StepsOrTrail, MusicRate)
+    return tonumber(medianBPM), tonumber(constantpeakBPM), GetDisplayBPMs(player, StepsOrTrail, MusicRate)
 end
 
 -- mostly original code with AC and AP added
@@ -82,7 +85,7 @@ local GetModsAndPlayerOptions = function(player)
 	-- be nil in that case.
 	local topscreen = SCREENMAN:GetTopScreen()
 	local topscreenname = topscreen and topscreen:GetName()
-	local modslevel = topscreenname == "ScreenEditOptions" and "ModsLevel_Stage" or "ModsLevel_Preferred" -- ScreenPlayerOptions is ScreenEditOptions
+	local modslevel = topscreenname == "ScreenEditOptions" and "ModsLevel_Stage" or "ModsLevel_Preferred"
 	local playeroptions = GAMESTATE:GetPlayerState(player):GetPlayerOptions(modslevel)
 
 	return mods, playeroptions
@@ -561,7 +564,7 @@ local Overrides = {
 				return { "ShowFaPlusWindow" }
 			end
 
-			return { "ShowFaPlusWindow", "ShowExScore", "ShowFaPlusPane", "SmallerWhite" }
+			return { "ShowFaPlusWindow", "ShowExScore", "ShowHardEXScore", "ShowFaPlusPane", "SmallerWhite" }
 		end,
 		LoadSelections = function(self, list, pn)
 			local mods = SL[ToEnumShortString(pn)].ActiveModifiers
@@ -572,8 +575,9 @@ local Overrides = {
 
 			list[1] = mods.ShowFaPlusWindow or false
 			list[2] = mods.ShowExScore or false
-			list[3] = mods.ShowFaPlusPane or false
-			list[4] = mods.SmallerWhite or false
+			list[3] = mods.ShowHardEXScore or false
+			list[4] = mods.ShowFaPlusPane or false
+			list[5] = mods.SmallerWhite or false
 			return list
 		end,
 		SaveSelections = function(self, list, pn)
@@ -592,10 +596,11 @@ local Overrides = {
 
 			mods.ShowFaPlusWindow = list[1]
 			mods.ShowExScore = list[2]
-			mods.ShowFaPlusPane = list[3]
-			mods.SmallerWhite = list[4]
+			mods.ShowHardEXScore = list[3]
+			mods.ShowFaPlusPane = list[4]
+			mods.SmallerWhite = list[5]
 			-- Default to FA+ pane if either options are active.
-			sl_pn.EvalPanePrimary = ((list[1] or list[2]) and list[3]) and 2 or 1
+			sl_pn.EvalPanePrimary = ((list[1] or list[2]) and list[4]) and 2 or 1
 		end
 	},
 	-------------------------------------------------------------------------
@@ -715,7 +720,7 @@ local Overrides = {
 		SelectType = "SelectMultiple",
 		Values = function()
 			-- GameplayExtras will be presented as a single OptionRow when WideScreen
-			local vals = { "SubtractiveScoring", "Pacemaker", "NPSGraphAtTop" }
+			local vals = { "Pacemaker", "NPSGraphAtTop" }
 
 			-- if not WideScreen (traditional DDR cabinets running at 640x480)
 			-- remove the last two choices to be appended an additional OptionRow (GameplayExtrasB below).
@@ -932,10 +937,19 @@ local Overrides = {
 	-------------------------------------------------------------------------
 	TimingWindows = {
 		Values = function()
-			return {
-				{true,true,true,true,true},
-				{true,true,true,false,false},
-			}
+			if SL.Global.GameMode == "Casual" then
+				return {
+					{true,true,true,true,true},
+					{true,true,true,false,false},
+				}
+			else
+				return {
+					{true,true,true,true,true},   -- None
+					{true,true,true,true,false},  -- W5s
+					{true,true,true,false,false}, -- W4s + W5s
+					{false,false,true,true,true}, -- W1s + W2s
+				}
+			end
 		end,
 		Choices = function()
 			local tns = "TapNoteScore" .. (SL.Global.GameMode=="ITG" and "" or SL.Global.GameMode)
@@ -943,6 +957,10 @@ local Overrides = {
 			if SL.Global.GameMode=="Casual" then
 				local idx = 2
 				t[idx] = THEME:GetString(tns,"W4").."s + "..t[idx-1]
+			else
+				t[2] = THEME:GetString(tns,"W5").."s"
+				t[3] = THEME:GetString(tns,"W4").."s + "..t[2]
+				t[4] = THEME:GetString(tns,"W1").."s + "..THEME:GetString(tns,"W2").."s"
 			end
 			return t
 		end,
@@ -950,7 +968,7 @@ local Overrides = {
 			local mods, playeroptions = GetModsAndPlayerOptions(pn)
 			-- First determine the set of actual enabled windows.
 			local windows = {true,true,true,true,true}
-			if SL.Global.Gamemode == "Casual" then
+			if SL.Global.GameMode == "Casual" then
 				windows[4] = false
 				windows[5] = false
 				list[2] = true
@@ -967,7 +985,6 @@ local Overrides = {
 				if list[i] then
 					mods.TimingWindows = self.Values[i]
 					playeroptions:ResetDisabledTimingWindows()
-					if SL.Global.GameMode == "ITG" then return end
 					for i,enabled in ipairs(mods.TimingWindows) do
 						if not enabled then
 							playeroptions:DisableTimingWindow("TimingWindow_W"..i)

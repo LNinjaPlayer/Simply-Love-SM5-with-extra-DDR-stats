@@ -63,12 +63,15 @@ local GetUsefulBPM = function(player, StepsOrTrail, MusicRate)
 		end
 	end
 	medianBPM = medianBPM * MusicRate
+	constantpeakBPM = constantpeakBPM * MusicRate
 	local fmt = MusicRate==1 and "%.0f" or "%.1f"
 	medianBPM = fmt:format(medianBPM)
+	constantpeakBPM = fmt:format(constantpeakBPM)
 	if MusicRate ~= 1 then
 		medianBPM = medianBPM:gsub("%.0", "")
+		constantpeakBPM = constantpeakBPM:gsub("%.0", "")
 	end
-    return medianBPM, constantpeakBPM
+    return tonumber(medianBPM), tonumber(constantpeakBPM)
 end
 
 
