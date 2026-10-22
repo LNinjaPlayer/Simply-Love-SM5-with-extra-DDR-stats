@@ -15,8 +15,7 @@ t[#t+1] = Def.ActorFrame{
 		CurrentCourseChangedMessageCommand=function(self) self:playcommand("Set") end,
 		SetCommand=function(self)
 			local song = GAMESTATE:GetCurrentCourse() or GAMESTATE:GetCurrentSong()
-			if not song then return end
-			if song:HasJacket() then
+			if song and song:HasJacket() then
 				self:visible(true)
 				local JacketPath = (song and song:GetJacketPath())
 				JacketPath = JacketPath:sub(2) -- get rid of the starting ' / ' cuz self:Load not workie \(>.<)/
